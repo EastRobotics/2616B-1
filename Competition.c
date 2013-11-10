@@ -29,27 +29,27 @@ void pre_auton() {
 }
 
 task autonomous() {
-	if (bootstrap() != 0) return;
-	switch(fieldZone) {
-		case ZONE_MIDDLE:
-			middleZoneAuton();
-			break;
-		case ZONE_HANGING:
-			hangingZoneAuton();
-			break;
-	}
+  if (bootstrap() != 0) return;
+  switch(fieldZone) {
+    case ZONE_MIDDLE:
+      middleZoneAuton();
+      break;
+    case ZONE_HANGING:
+      hangingZoneAuton();
+      break;
+  }
 }
 
 task usercontrol() {
-	clearLCDLine(0);
-	displayLCDCenteredString(0, "User Control");
-	bLCDBacklight = true;
+  clearLCDLine(0);
+  displayLCDCenteredString(0, "User Control");
+  bLCDBacklight = true;
 
-	while (true) {
-		displayLCDVoltageString(1);
-		drive(NORM(vexRT[Ch3]), NORM(vexRT[Ch2]));
-		lift((nVexRCReceiveState & vrXmit2) ? NORM(vexRT[Ch3Xmtr2]) : (vexRT[Btn6U] ? 127 : vexRT[Btn6D] ? -127 : 0));
-		intake((nVexRCReceiveState & vrXmit2) ? NORM(vexRT[Ch2Xmtr2]) : (vexRT[Btn5U] ? 127 : vexRT[Btn5D] ? -127 : 0));
-		wait1Msec(20);
-	}
+  while (true) {
+    displayLCDVoltageString(1);
+    drive(NORM(vexRT[Ch3]), NORM(vexRT[Ch2]));
+    lift((nVexRCReceiveState & vrXmit2) ? NORM(vexRT[Ch3Xmtr2]) : (vexRT[Btn6U] ? 127 : vexRT[Btn6D] ? -127 : 0));
+    intake((nVexRCReceiveState & vrXmit2) ? NORM(vexRT[Ch2Xmtr2]) : (vexRT[Btn5U] ? 127 : vexRT[Btn5D] ? -127 : 0));
+    wait1Msec(20);
+  }
 }
