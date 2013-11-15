@@ -62,7 +62,27 @@ void middleZoneAuton() {
 
 void hangingZoneAuton() {
 	intake(-127);
-	driveTicks(60, 100);
+	driveTicks(60, 450);
 	wait1Msec(500);
+	driveTicks(-60, 50);
 	intake(0);
+	turnTicks((fieldColor == COLOR_BLUE), 60, 550);
+	while (SensorValue[liftHeight] < 1575) { // Actually 1840
+		lift(127);
+	}
+	lift(0);
+	driveTicks(127, 175);
+	intake(127);
+	driveTicks(127, 100);
+	wait1Msec(2000);
+	intake(0);
+	while (SensorValue[liftHeight] > 1550) {
+		lift(-127);
+	}
+	lift(0);
+	driveTicks(-127, 300);
+	turnTicks((fieldColor == COLOR_RED), 60, 225);
+	driveTicks(127, 250);
+	turnTicks((fieldColor == COLOR_BLUE), 60, 225);
+	driveTicks(127, 325);
 }
