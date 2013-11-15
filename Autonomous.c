@@ -34,30 +34,51 @@ void turnTicks(bool right, int power, int ticks) {
 	drive(0, 0);
 }
 
-void middleZoneAuton() {
-	while (SensorValue[liftHeight] < 1675) { // Actually 1840
-		lift(127);
+int liftTarget(int target) {
+	ClearTimer(T4);
+	int maxTime = 2500;
+	int difference = target - SensorValue[liftHeight];
+	if (difference > 0) {
+		while (SensorValue[liftHeight] < target && time1[T4] < maxTime) {
+			lift(127);
+		}
+	} else if (difference < 0) {
+		while (SensorValue[liftHeight] > target && time1[T4] < maxTime) {
+			lift(-127);
+		}
 	}
 	lift(0);
+	if (time1[T4] >= maxTime) return -1;
+	else return 0;
+}
+
+void middleZoneAuton() {
+	if (liftTarget(1675) != 0) return;
 	driveTicks(127, 525);
 	wait1Msec(500);
 	driveTicks(-60, 100);
 	wait1Msec(500);
 	turnTicks((fieldColor == COLOR_RED), 60, 275);
 	wait1Msec(500);
-	driveTicks(60, 450);
+	driveTicks(127, 450);
 	wait1Msec(500);
-	turnTicks((fieldColor == COLOR_BLUE), 60, 275);
+	turnTicks((fieldColor == COLOR_BLUE), 60, 250);
 	wait1Msec(500);
-	driveTicks(60, 200);
+	driveTicks(60, 300);
 	wait1Msec(500);
-	driveTicks(-60, 200);
-	while (SensorValue[liftHeight] < 1675) { // Actually 1840
-		lift(127);
-	}
-//  driveTicks(127, 500);
-//  driveTicks(-127, 250);
-//  turnTicks(true, 127, 200);
+	driveTicks(-60, 300);
+	if (liftTarget(1500) != 0) return;
+	turnTicks((fieldColor == COLOR_BLUE), 60, 35);
+	driveTicks(127, 1000);
+	if (liftTarget(2000) != 0) return;
+    driveTicks(127, 200);
+    wait1Msec(500);
+	intake(127);
+	wait1Msec(750);
+	intake(0);
+	driveTicks(-127, 100);
+	if (liftTarget(1500) != 0) return;
+	lift(0);
 }
 
 void hangingZoneAuton() {
@@ -67,19 +88,13 @@ void hangingZoneAuton() {
 	driveTicks(-60, 50);
 	intake(0);
 	turnTicks((fieldColor == COLOR_BLUE), 60, 550);
-	while (SensorValue[liftHeight] < 1575) { // Actually 1840
-		lift(127);
-	}
-	lift(0);
+	if (liftTarget(1575) != 0) return;
 	driveTicks(127, 175);
 	intake(127);
 	driveTicks(127, 100);
 	wait1Msec(2000);
 	intake(0);
-	while (SensorValue[liftHeight] > 1550) {
-		lift(-127);
-	}
-	lift(0);
+	if (liftTarget(1500) != 0) return;
 	driveTicks(-127, 300);
 	turnTicks((fieldColor == COLOR_RED), 60, 225);
 	driveTicks(127, 250);
