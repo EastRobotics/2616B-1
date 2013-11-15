@@ -43,15 +43,15 @@ void middleZoneAuton() {
 	wait1Msec(500);
 	driveTicks(-60, 100);
 	wait1Msec(500);
-	turnTicks((fieldColor == COLOR_BLUE), 60, 275);
+	turnTicks((fieldColor == COLOR_RED), 60, 275);
 	wait1Msec(500);
 	driveTicks(60, 450);
 	wait1Msec(500);
-	turnTicks((fieldColor == COLOR_RED), 60, 275);
+	turnTicks((fieldColor == COLOR_BLUE), 60, 275);
 	wait1Msec(500);
-	driveTicks(60, 100);
+	driveTicks(60, 200);
 	wait1Msec(500);
-	driveTicks(-60, 100);
+	driveTicks(-60, 200);
 	while (SensorValue[liftHeight] < 1675) { // Actually 1840
 		lift(127);
 	}
