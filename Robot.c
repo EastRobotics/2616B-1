@@ -8,10 +8,10 @@ void lift(int power) {
 void drive(int left, int right) {
 	motor[LFDrive] = left;
 	motor[LCDrive] = left;
-	motor[LRDrive] = left;
+	motor[LDDrive] = left;
 	motor[RFDrive] = right;
 	motor[RCDrive] = right;
-	motor[RRDrive] = right;
+	motor[RDDrive] = right;
 }
 
 void intake(int power) {

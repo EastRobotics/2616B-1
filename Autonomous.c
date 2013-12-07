@@ -4,8 +4,8 @@ int bootstrap() {
 	displayLCDCenteredString(0, "Autonomous");
 	bLCDBacklight = false;
 
-	intake(-127);
-	wait1Msec(500);
+	intake(127);
+	wait1Msec(750);
 	intake(0);
 
 	if (!enabled) return -1;
@@ -15,28 +15,28 @@ int bootstrap() {
 }
 
 void driveTicks(int power, int ticks) {
-	nMotorEncoder[LCDrive] = 0;
-	nMotorEncoder[RCDrive] = 0;
-	while (abs(nMotorEncoder[LCDrive]) < ticks || abs(nMotorEncoder[RCDrive]) < ticks) {
-		drive(abs(nMotorEncoder[LCDrive]) < ticks ? power : 0, abs(nMotorEncoder[RCDrive]) < ticks ? power : 0);
+	nMotorEncoder[LDDrive] = 0;
+	nMotorEncoder[RDDrive] = 0;
+	while (abs(nMotorEncoder[LDDrive]) < ticks || abs(nMotorEncoder[RDDrive]) < ticks) {
+		drive(abs(nMotorEncoder[LDDrive]) < ticks ? power : 0, abs(nMotorEncoder[RDDrive]) < ticks ? power : 0);
 	}
 	drive(0, 0);
 }
 
 void turnTicks(bool right, int power, int ticks) {
-	nMotorEncoder[LCDrive] = 0;
-	nMotorEncoder[RCDrive] = 0;
+	nMotorEncoder[LDDrive] = 0;
+	nMotorEncoder[RDDrive] = 0;
 	int leftScale = right ? 1 : -1;
 	int rightScale = right ? -1 : 1;
-	while (abs(nMotorEncoder[LCDrive]) < ticks || abs(nMotorEncoder[RCDrive]) < ticks) {
-		drive(abs(nMotorEncoder[LCDrive]) < ticks ? leftScale * power : 0, abs(nMotorEncoder[RCDrive]) < ticks ? rightScale * power : 0);
+	while (abs(nMotorEncoder[LDDrive]) < ticks || abs(nMotorEncoder[RDDrive]) < ticks) {
+		drive(abs(nMotorEncoder[LDDrive]) < ticks ? leftScale * power : 0, abs(nMotorEncoder[RDDrive]) < ticks ? rightScale * power : 0);
 	}
 	drive(0, 0);
 }
 
 int liftTarget(int target) {
 	ClearTimer(T4);
-	int maxTime = 2500;
+	int maxTime = 2000;
 	int difference = target - SensorValue[liftHeight];
 	if (difference > 0) {
 		while (SensorValue[liftHeight] < target && time1[T4] < maxTime) {
