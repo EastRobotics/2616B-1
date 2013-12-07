@@ -5,7 +5,7 @@ int bootstrap() {
 	bLCDBacklight = false;
 
 	intake(127);
-	wait1Msec(750);
+	wait1Msec(250);
 	intake(0);
 
 	if (!enabled) return -1;
@@ -53,51 +53,51 @@ int liftTarget(int target) {
 }
 
 void middleZoneAuton() {
-	if (liftTarget(1675) != 0) return;
-	driveTicks(127, 525);
-	wait1Msec(500);
-	driveTicks(-60, 100);
-	wait1Msec(500);
-	turnTicks((fieldColor == COLOR_RED), 60, 275);
-	wait1Msec(500);
-	driveTicks(127, 450);
-	wait1Msec(500);
-	turnTicks((fieldColor == COLOR_BLUE), 60, 250);
-	wait1Msec(500);
-	driveTicks(60, 300);
-	wait1Msec(500);
-	driveTicks(-60, 300);
-	if (liftTarget(1500) != 0) return;
-	turnTicks((fieldColor == COLOR_BLUE), 60, 35);
-	driveTicks(127, 1000);
-	if (liftTarget(2000) != 0) return;
-    driveTicks(127, 200);
-    wait1Msec(500);
-	intake(127);
-	wait1Msec(750);
-	intake(0);
-	driveTicks(-127, 100);
-	if (liftTarget(1500) != 0) return;
-	lift(0);
+	// if (liftTarget(1675) != 0) return;
+	// driveTicks(127, 525);
+	// wait1Msec(500);
+	// driveTicks(-60, 100);
+	// wait1Msec(500);
+	// turnTicks((fieldColor == COLOR_RED), 60, 275);
+	// wait1Msec(500);
+	// driveTicks(127, 450);
+	// wait1Msec(500);
+	// turnTicks((fieldColor == COLOR_BLUE), 60, 250);
+	// wait1Msec(500);
+	// driveTicks(60, 300);
+	// wait1Msec(500);
+	// driveTicks(-60, 300);
+	// if (liftTarget(1500) != 0) return;
+	// turnTicks((fieldColor == COLOR_BLUE), 60, 35);
+	// driveTicks(127, 1000);
+	// if (liftTarget(2000) != 0) return;
+	// driveTicks(127, 200);
+	// wait1Msec(500);
+	// intake(127);
+	// wait1Msec(750);
+	// intake(0);
+	// driveTicks(-127, 100);
+	// if (liftTarget(1500) != 0) return;
+	// lift(0);
 }
 
 void hangingZoneAuton() {
-	intake(-127);
-	driveTicks(60, 450);
-	wait1Msec(500);
-	driveTicks(-60, 50);
-	intake(0);
-	turnTicks((fieldColor == COLOR_BLUE), 60, 550);
-	if (liftTarget(1575) != 0) return;
-	driveTicks(127, 175);
-	intake(127);
-	driveTicks(127, 100);
-	wait1Msec(2000);
-	intake(0);
-	if (liftTarget(1500) != 0) return;
-	driveTicks(-127, 300);
-	turnTicks((fieldColor == COLOR_RED), 60, 225);
-	driveTicks(127, 250);
-	turnTicks((fieldColor == COLOR_BLUE), 60, 225);
-	driveTicks(127, 325);
+	// intake(-127);
+	// driveTicks(60, 450);
+	// wait1Msec(500);
+	// driveTicks(-60, 50);
+	// intake(0);
+	// turnTicks((fieldColor == COLOR_BLUE), 60, 550);
+	// if (liftTarget(1575) != 0) return;
+	// driveTicks(127, 175);
+	// intake(127);
+	// driveTicks(127, 100);
+	// wait1Msec(2000);
+	// intake(0);
+	// if (liftTarget(1500) != 0) return;
+	// driveTicks(-127, 300);
+	// turnTicks((fieldColor == COLOR_RED), 60, 225);
+	// driveTicks(127, 250);
+	// turnTicks((fieldColor == COLOR_BLUE), 60, 225);
+	// driveTicks(127, 325);
 }
