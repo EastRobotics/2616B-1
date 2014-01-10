@@ -2,8 +2,6 @@
 #pragma config(Sensor, in1,    liftHeight,     sensorPotentiometer)
 #pragma config(Sensor, in2,    expander,       sensorAnalog)
 #pragma config(Sensor, dgtl1,  solenoid,       sensorDigitalOut)
-#pragma config(Sensor, dgtl2,  ,               sensorQuadEncoder)
-#pragma config(Sensor, dgtl4,  ,               sensorQuadEncoder)
 #pragma config(Sensor, I2C_1,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign)
 #pragma config(Sensor, I2C_2,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign)
 #pragma config(Motor,  port1,           RLift,         tmotorVex393HighSpeed, openLoop)
@@ -48,11 +46,14 @@ task usercontrol() {
 	displayLCDCenteredString(0, "User Control");
 	bLCDBacklight = true;
 
+	bool pressed = false;
 	while (true) {
 		displayLCDVoltageString(1);
 		drive(NORM(vexRT[Ch3]), NORM(vexRT[Ch2]));
 		lift((nVexRCReceiveState & vrXmit2) ? NORM(vexRT[Ch3Xmtr2]) : (vexRT[Btn6U] ? 127 : vexRT[Btn6D] ? -127 : 0));
 		intake((nVexRCReceiveState & vrXmit2) ? NORM(vexRT[Ch2Xmtr2]) : (vexRT[Btn5U] ? 127 : vexRT[Btn5D] ? -127 : 0));
+		if (!pressed && vexRT[Btn8D]) popper(!popped());
+		pressed = vexRT[Btn8D] ? true : false;
 		wait1Msec(20);
 	}
 }

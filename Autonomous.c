@@ -5,7 +5,7 @@ int bootstrap() {
 	bLCDBacklight = false;
 
 	intake(127);
-	wait1Msec(250);
+	wait1Msec(500);
 	intake(0);
 
 	if (!enabled) return -1;
@@ -47,27 +47,29 @@ int liftTarget(int target) {
 			lift(-127);
 		}
 	}
-	lift(0);
+	lift(20);
 	if (time1[T4] >= maxTime) return -1;
 	else return 0;
 }
 
 void middleZoneAuton() {
-	// if (liftTarget(1675) != 0) return;
-	// driveTicks(127, 525);
-	// wait1Msec(500);
-	// driveTicks(-60, 100);
-	// wait1Msec(500);
-	// turnTicks((fieldColor == COLOR_RED), 60, 275);
-	// wait1Msec(500);
-	// driveTicks(127, 450);
-	// wait1Msec(500);
-	// turnTicks((fieldColor == COLOR_BLUE), 60, 250);
-	// wait1Msec(500);
-	// driveTicks(60, 300);
-	// wait1Msec(500);
-	// driveTicks(-60, 300);
-	// if (liftTarget(1500) != 0) return;
+	if (liftTarget(LIFT_UPPER_LIMIT - 500) != 0) return;
+	driveTicks(127, 525);
+	intake(127);
+	wait1Msec(1000);
+	intake(0);
+	driveTicks(-60, 100);
+	wait1Msec(500);
+	turnTicks((fieldColor == COLOR_RED), 60, 275);
+	wait1Msec(500);
+	driveTicks(127, 450);
+	wait1Msec(500);
+	turnTicks((fieldColor == COLOR_BLUE), 60, 250);
+	wait1Msec(500);
+	driveTicks(60, 300);
+	wait1Msec(500);
+	driveTicks(-60, 300);
+	if (liftTarget(LIFT_LOWER_LIMIT) != 0) return;
 	// turnTicks((fieldColor == COLOR_BLUE), 60, 35);
 	// driveTicks(127, 1000);
 	// if (liftTarget(2000) != 0) return;
