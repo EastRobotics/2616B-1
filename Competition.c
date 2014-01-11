@@ -46,14 +46,27 @@ task usercontrol() {
 	displayLCDCenteredString(0, "User Control");
 	bLCDBacklight = true;
 
-	bool pressed = false;
+	bool downPressed = false;
+	bool rightPressed = false;
 	while (true) {
 		displayLCDVoltageString(1);
 		drive(NORM(vexRT[Ch3]), NORM(vexRT[Ch2]));
 		lift((nVexRCReceiveState & vrXmit2) ? NORM(vexRT[Ch3Xmtr2]) : (vexRT[Btn6U] ? 127 : vexRT[Btn6D] ? -127 : 0));
 		intake((nVexRCReceiveState & vrXmit2) ? NORM(vexRT[Ch2Xmtr2]) : (vexRT[Btn5U] ? 127 : vexRT[Btn5D] ? -127 : 0));
-		if (!pressed && vexRT[Btn8D]) popper(!popped());
-		pressed = vexRT[Btn8D] ? true : false;
+		if (!downPressed && vexRT[Btn8D]) popper(!popped());
+		if (!rightPressed && vexRT[Btn8R] && !popped()) {
+			drive(-96, -96);
+			wait1Msec(150);
+			drive(0, 0);
+			wait1Msec(200);
+			drive(96, 96);
+			wait1Msec(200);
+			popper(true);
+			wait1Msec(100);
+			drive(0,0);
+		}
+		downPressed = vexRT[Btn8D] ? true : false;
+		rightPressed = vexRT[Btn8R] ? true : false;
 		wait1Msec(20);
 	}
 }

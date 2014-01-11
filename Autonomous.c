@@ -81,22 +81,23 @@ void middleZoneAuton() {
 }
 
 void hangingZoneAuton() {
-	// intake(-127);
-	// driveTicks(60, 450);
-	// wait1Msec(500);
-	// driveTicks(-60, 50);
-	// intake(0);
-	// turnTicks((fieldColor == COLOR_BLUE), 60, 550);
-	// if (liftTarget(1575) != 0) return;
-	// driveTicks(127, 175);
-	// intake(127);
-	// driveTicks(127, 100);
-	// wait1Msec(2000);
-	// intake(0);
-	// if (liftTarget(1500) != 0) return;
-	// driveTicks(-127, 300);
-	// turnTicks((fieldColor == COLOR_RED), 60, 225);
-	// driveTicks(127, 250);
-	// turnTicks((fieldColor == COLOR_BLUE), 60, 225);
-	// driveTicks(127, 325);
+	intake(-127);
+	driveTicks(60, 300);
+	wait1Msec(500);
+	driveTicks(-60, 50);
+	turnTicks((fieldColor == COLOR_BLUE), 60, 400);
+	intake(0);
+	if (liftTarget(1575) != 0) return;
+	driveTicks(127, 150);
+	intake(127);
+	driveTicks(127, 100);
+	wait1Msec(2000);
+	intake(0);
+	driveTicks(-127, 300);
+	if (liftTarget(LIFT_LOWER_LIMIT) != 0) return;
+	turnTicks((fieldColor == COLOR_RED), 60, 50);
+	intake(-127);
+	driveTicks(127, 300);
+	wait1Msec(1000);
+	intake(0);
 }
