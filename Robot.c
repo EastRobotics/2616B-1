@@ -1,7 +1,7 @@
 #define VOLTAGE_THRESHOLD 1250
 
-#define LIFT_LOWER_LIMIT 750
-#define LIFT_UPPER_LIMIT 2310
+#define LIFT_LOWER_LIMIT 800
+#define LIFT_UPPER_LIMIT 2170
 
 void lift(int power) {
 	motor[LLift] = power;

@@ -47,40 +47,37 @@ int liftTarget(int target) {
 			lift(-127);
 		}
 	}
-	lift(20);
+	lift(0);
 	if (time1[T4] >= maxTime) return -1;
 	else return 0;
 }
 
 void middleZoneAuton() {
 	if (liftTarget(LIFT_UPPER_LIMIT - 500) != 0) return;
-	driveTicks(127, 525);
-	intake(127);
-	wait1Msec(1000);
-	intake(0);
-	driveTicks(-60, 100);
-	wait1Msec(500);
-	turnTicks((fieldColor == COLOR_RED), 60, 275);
-	wait1Msec(500);
-	driveTicks(127, 450);
-	wait1Msec(500);
-	turnTicks((fieldColor == COLOR_BLUE), 60, 250);
-	wait1Msec(500);
-	driveTicks(60, 300);
-	wait1Msec(500);
-	driveTicks(-60, 300);
+	driveTicks(127, 1000);
+	wait1Msec(250);
+	driveTicks(-127, 550);
 	if (liftTarget(LIFT_LOWER_LIMIT) != 0) return;
-	// turnTicks((fieldColor == COLOR_BLUE), 60, 35);
-	// driveTicks(127, 1000);
-	// if (liftTarget(2000) != 0) return;
-	// driveTicks(127, 200);
-	// wait1Msec(500);
-	// intake(127);
-	// wait1Msec(750);
-	// intake(0);
-	// driveTicks(-127, 100);
-	// if (liftTarget(1500) != 0) return;
-	// lift(0);
+	wait1Msec(1500);
+	driveTicks(96, 1300);
+	wait1Msec(500);
+	turnTicks((fieldColor == COLOR_RED), 96, 100);
+	if (liftTarget(LIFT_UPPER_LIMIT - 100) != 0) return;
+	driveTicks(127, 600);
+	drive(0, 127);
+	wait1Msec(500);
+	drive(0, 0);
+	intake(127);
+	wait1Msec(500);
+	intake(0);
+	wait1Msec(750);
+	driveTicks(-60, 175);
+	wait1Msec(500);
+	intake(127);
+	wait1Msec(1500);
+	intake(0);
+	wait1Msec(750);
+	driveTicks(-127, 200);
 }
 
 void hangingZoneAuton() {
