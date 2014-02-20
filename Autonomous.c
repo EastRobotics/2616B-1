@@ -1,103 +1,143 @@
-int bootstrap() {
-	clearLCDLine(0);
-	clearLCDLine(1);
-	displayLCDCenteredString(0, "Autonomous");
-	bLCDBacklight = false;
+static int globalPower;
+static int globalTicks;
+static bool globalDone;
+task drivingTask() {
+	globalDone = false;
+	driveTicks(globalPower, globalTicks);
+	globalDone = true;
+}
 
-	intake(127);
-	wait1Msec(500);
+void driveTicksAsync(int power, int ticks) {
+	globalPower = power;
+	globalTicks = ticks;
+	StartTask(drivingTask);
+}
+
+void waitForDrive() {
+	while (!globalDone)
+		wait1Msec(1);
+}
+
+void programmingSkills() {
+	intake(-127);
+	driveTicks(60, 250);
+	wait1Msec(1000);
+	driveTicks(-127, 1600);
 	intake(0);
-
-	if (!enabled) return -1;
-	if (fieldColor == -1) return -1;
-	if (fieldZone == -1) return -1;
-	return 0;
+	wait1Msec(2000);
+	driveTicks(127, 1100);
+	driveTicksAsync(72, 450);
+	if (liftTarget(LIFT_UPPER_LIMIT) != 0) return;
+	lift(30);
+	waitForDrive();
+	driveTicks(64, 200);
+	wait1Msec(500);
+	intake(127);
+	wait1Msec(1500);
+	intake(0);
+	driveTicks(-72, 200);
+	if (liftTarget(LIFT_LOWER_LIMIT) != 0) return;
+	driveTicks(-127, 1200);
+	if (liftTarget(LIFT_UPPER_LIMIT - 550) != 0) return;
+	wait1Msec(1000);
+	driveTicks(127, 200);
+	wait1Msec(500);
+	driveTicks(-64, 100);
+	turnTicks(true, 64, 275);
+	driveTicks(127, 3000);
 }
 
-void driveTicks(int power, int ticks) {
-	nMotorEncoder[LDDrive] = 0;
-	nMotorEncoder[RDDrive] = 0;
-	while (abs(nMotorEncoder[LDDrive]) < ticks || abs(nMotorEncoder[RDDrive]) < ticks) {
-		drive(abs(nMotorEncoder[LDDrive]) < ticks ? power : 0, abs(nMotorEncoder[RDDrive]) < ticks ? power : 0);
-	}
+void middleZoneAutonCap() {
+	driveTicks(127, 1300);
+	wait1Msec(500);
+	turnTicks((SelectedFieldColor() == FieldColorRed), 96, 100);
+	if (liftTarget(LIFT_UPPER_LIMIT) != 0) return;
+	lift(30);
+	driveTicks(64, 600);
+	drive((SelectedFieldColor() == FieldColorRed) ? 0 : 127, (SelectedFieldColor() == FieldColorRed) ? 127 : 0);
+	wait1Msec(500);
 	drive(0, 0);
-}
-
-void turnTicks(bool right, int power, int ticks) {
-	nMotorEncoder[LDDrive] = 0;
-	nMotorEncoder[RDDrive] = 0;
-	int leftScale = right ? 1 : -1;
-	int rightScale = right ? -1 : 1;
-	while (abs(nMotorEncoder[LDDrive]) < ticks || abs(nMotorEncoder[RDDrive]) < ticks) {
-		drive(abs(nMotorEncoder[LDDrive]) < ticks ? leftScale * power : 0, abs(nMotorEncoder[RDDrive]) < ticks ? rightScale * power : 0);
-	}
-	drive(0, 0);
-}
-
-int liftTarget(int target) {
-	ClearTimer(T4);
-	int maxTime = 2000;
-	int difference = target - SensorValue[liftHeight];
-	if (difference > 0) {
-		while (SensorValue[liftHeight] < target && time1[T4] < maxTime) {
-			lift(127);
-		}
-	} else if (difference < 0) {
-		while (SensorValue[liftHeight] > target && time1[T4] < maxTime) {
-			lift(-127);
-		}
-	}
+	wait1Msec(500);
+	intake(127);
+	wait1Msec(300);
+	intake(0);
+	driveTicks(-60, 125);
 	lift(0);
-	if (time1[T4] >= maxTime) return -1;
-	else return 0;
-}
-
-void middleZoneAuton() {
-	if (liftTarget(LIFT_UPPER_LIMIT - 500) != 0) return;
+	wait1Msec(500);
+	intake(54);
+	wait1Msec(1250);
+	intake(0);
+	driveTicks(-127, 100);
+	if (liftTarget(LIFT_LOWER_LIMIT) != 0) return;
+	turnTicks((SelectedFieldColor() == FieldColorRed), 96, 25);
+	driveTicks(-127, 1200);
+	if (liftTarget(LIFT_UPPER_LIMIT - 550) != 0) return;
 	driveTicks(127, 1000);
 	wait1Msec(250);
-	driveTicks(-127, 550);
+	driveTicks(-127, 300);
 	if (liftTarget(LIFT_LOWER_LIMIT) != 0) return;
-	wait1Msec(1500);
-	driveTicks(96, 1300);
-	wait1Msec(500);
-	turnTicks((fieldColor == COLOR_RED), 96, 100);
-	if (liftTarget(LIFT_UPPER_LIMIT - 100) != 0) return;
-	driveTicks(127, 600);
-	drive(0, 127);
-	wait1Msec(500);
-	drive(0, 0);
-	intake(127);
-	wait1Msec(500);
-	intake(0);
-	wait1Msec(750);
-	driveTicks(-60, 175);
-	wait1Msec(500);
-	intake(127);
-	wait1Msec(1500);
-	intake(0);
-	wait1Msec(750);
-	driveTicks(-127, 200);
 }
 
-void hangingZoneAuton() {
-	intake(-127);
-	driveTicks(60, 300);
+void middleZoneAutonPartner() {
+	driveTicks(127, 1100);
+	driveTicksAsync(72, 450);
+	if (liftTarget(LIFT_UPPER_LIMIT) != 0) return;
+	lift(30);
+	waitForDrive();
+	driveTicks(64, 200);
 	wait1Msec(500);
-	driveTicks(-60, 50);
-	turnTicks((fieldColor == COLOR_BLUE), 60, 400);
+	intake(127);
+	wait1Msec(500);
 	intake(0);
-	if (liftTarget(1575) != 0) return;
+	driveTicks(-72, 200);
+	if (liftTarget(LIFT_LOWER_LIMIT) != 0) return;
+	driveTicks(-127, 1200);
+
+	wait1Msec(2500);
+
+	driveTicks(127, 1100);
+	driveTicksAsync(72, 450);
+	if (liftTarget(LIFT_UPPER_LIMIT) != 0) return;
+	lift(30);
+	waitForDrive();
+	driveTicks(64, 200);
+	wait1Msec(500);
+	intake(127);
+	wait1Msec(1500);
+	intake(0);
+	driveTicks(-72, 200);
+	if (liftTarget(LIFT_LOWER_LIMIT) != 0) return;
+	driveTicks(-127, 1200);
+
+	if (liftTarget(LIFT_UPPER_LIMIT - 550) != 0) return;
+	driveTicks(127, 500);
+}
+
+void hangingZoneAutonClear() {
+	intake(-127);
+	driveTicks(60, 250);
+	wait1Msec(1000);
+	driveTicks(-60, 50);
+	turnTicks((SelectedFieldColor() == FieldColorBlue), 60, 400);
+	intake(0);
+	if (liftTarget(LIFT_UPPER_LIMIT - 400) != 0) return;
 	driveTicks(127, 150);
 	intake(127);
 	driveTicks(127, 100);
-	wait1Msec(2000);
+	wait1Msec(1500);
 	intake(0);
 	driveTicks(-127, 300);
 	if (liftTarget(LIFT_LOWER_LIMIT) != 0) return;
-	turnTicks((fieldColor == COLOR_RED), 60, 50);
 	intake(-127);
-	driveTicks(127, 300);
+	driveTicks(127, 600);
 	wait1Msec(1000);
+	turnTicks((SelectedFieldColor() == FieldColorBlue), 60, 200);
+	if (liftTarget(LIFT_LOWER_LIMIT + 200) != 0) return;
 	intake(0);
+	driveTicks(127, 1500);
+	if (liftTarget(LIFT_UPPER_LIMIT - 300) != 0) return;
+	launcher(true);
+	wait1Msec(1000);
+	launcher(false);
+	if (liftTarget(LIFT_LOWER_LIMIT) != 0) return;
 }

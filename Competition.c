@@ -26,19 +26,40 @@
 
 void pre_auton() {
 	bStopTasksBetweenModes = true;
+	AddAutonomousRoutine(FieldZoneAny, FieldColorAny, "None", -1);
+	AddAutonomousRoutine(FieldZoneMiddle, FieldColorAny, "Cap", 0);
+	AddAutonomousRoutine(FieldZoneMiddle, FieldColorAny, "Partner", 1);
+	AddAutonomousRoutine(FieldZoneHanging, FieldColorAny, "Clear", 2);
+	AddAutonomousRoutine(FieldZoneMiddle, FieldColorRed, "Skills", 3);
 	SelectAutonomousRoutine();
 }
 
 task autonomous() {
-	if (bootstrap() != 0) return;
-	switch(fieldZone) {
-		case ZONE_MIDDLE:
-			middleZoneAuton();
+	clearLCDLine(0);
+	clearLCDLine(1);
+	bLCDBacklight = false;
+	AutonomousRoutine *routine = SelectedAutonomousRoutine();
+	displayLCDCenteredString(0, routine ? routine->name : "");
+
+	intake(127);
+	wait1Msec(500);
+	intake(0);
+
+	switch (routine ? routine->tag : -1) {
+		case 0:
+			middleZoneAutonCap();
 			break;
-		case ZONE_HANGING:
-			hangingZoneAuton();
+		case 1:
+			middleZoneAutonPartner();
+			break;
+		case 2:
+			hangingZoneAutonClear();
+			break;
+		case 3:
+			programmingSkills();
 			break;
 	}
+
 }
 
 task usercontrol() {
@@ -46,27 +67,14 @@ task usercontrol() {
 	displayLCDCenteredString(0, "User Control");
 	bLCDBacklight = true;
 
-	bool downPressed = false;
-	bool rightPressed = false;
+	bool pressed = false;
 	while (true) {
 		displayLCDVoltageString(1);
 		drive(NORM(vexRT[Ch3]), NORM(vexRT[Ch2]));
 		lift((nVexRCReceiveState & vrXmit2) ? NORM(vexRT[Ch3Xmtr2]) : (vexRT[Btn6U] ? 127 : vexRT[Btn6D] ? -127 : 0));
 		intake((nVexRCReceiveState & vrXmit2) ? NORM(vexRT[Ch2Xmtr2]) : (vexRT[Btn5U] ? 127 : vexRT[Btn5D] ? -127 : 0));
-		if (!downPressed && vexRT[Btn8D]) popper(!popped());
-		if (!rightPressed && vexRT[Btn8R] && !popped()) {
-			drive(-96, -96);
-			wait1Msec(150);
-			drive(0, 0);
-			wait1Msec(200);
-			drive(96, 96);
-			wait1Msec(200);
-			popper(true);
-			wait1Msec(100);
-			drive(0,0);
-		}
-		downPressed = vexRT[Btn8D] ? true : false;
-		rightPressed = vexRT[Btn8R] ? true : false;
+		if (!pressed && vexRT[Btn8D]) launcher(!launched());
+		pressed = (vexRT[Btn8D] != 0);
 		wait1Msec(20);
 	}
 }

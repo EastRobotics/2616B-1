@@ -1,7 +1,7 @@
 #define VOLTAGE_THRESHOLD 1250
 
-#define LIFT_LOWER_LIMIT 800
-#define LIFT_UPPER_LIMIT 2170
+#define LIFT_LOWER_LIMIT 840
+#define LIFT_UPPER_LIMIT 2270
 
 void lift(int power) {
 	motor[LLift] = power;
@@ -22,12 +22,12 @@ void intake(int power) {
 	motor[RIntake] = power;
 }
 
-void popper(bool pop) {
-	SensorValue[solenoid] = pop ? 1 : 0;
+void launcher(bool launch) {
+	SensorValue[solenoid] = launch ? 1 : 0;
 }
 
-bool popped() {
-	return SensorValue[solenoid] ? true : false;
+bool launched() {
+	return (SensorValue[solenoid] != 0);
 }
 
 void displayVoltage(int line, int position, int millivolts, bool leftAligned) {
@@ -51,4 +51,42 @@ void displayLCDVoltageString(int line) {
 	int expanderBatteryLevel = (float)SensorValue[expander] * 1000 / 280;
 	displayVoltage(1, 0, nImmediateBatteryLevel, true);
 	displayVoltage(1, 11, expanderBatteryLevel, false);
+}
+
+void driveTicks(int power, int ticks) {
+	nMotorEncoder[LDDrive] = 0;
+	nMotorEncoder[RDDrive] = 0;
+	while (abs(nMotorEncoder[LDDrive]) < ticks || abs(nMotorEncoder[RDDrive]) < ticks) {
+		drive(abs(nMotorEncoder[LDDrive]) < ticks ? power : 0, abs(nMotorEncoder[RDDrive]) < ticks ? power : 0);
+	}
+	drive(0, 0);
+}
+
+void turnTicks(bool right, int power, int ticks) {
+	nMotorEncoder[LDDrive] = 0;
+	nMotorEncoder[RDDrive] = 0;
+	int leftScale = right ? 1 : -1;
+	int rightScale = right ? -1 : 1;
+	while (abs(nMotorEncoder[LDDrive]) < ticks || abs(nMotorEncoder[RDDrive]) < ticks) {
+		drive(abs(nMotorEncoder[LDDrive]) < ticks ? leftScale * power : 0, abs(nMotorEncoder[RDDrive]) < ticks ? rightScale * power : 0);
+	}
+	drive(0, 0);
+}
+
+int liftTarget(int target) {
+	ClearTimer(T4);
+	int maxTime = 2000;
+	int difference = target - SensorValue[liftHeight];
+	if (difference > 0) {
+		while (SensorValue[liftHeight] < target && time1[T4] < maxTime) {
+			lift(127);
+		}
+	} else if (difference < 0) {
+		while (SensorValue[liftHeight] > target && time1[T4] < maxTime) {
+			lift(-127);
+		}
+	}
+	lift(0);
+	if (time1[T4] >= maxTime) return -1;
+	else return 0;
 }

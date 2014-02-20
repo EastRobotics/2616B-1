@@ -1,14 +1,74 @@
-#define ZONE_HANGING 0
-#define ZONE_MIDDLE 1
+typedef enum {
+	FieldZoneUnknown = 0x0,
+	FieldZoneHanging = 0x1,
+	FieldZoneMiddle = 0x2,
+	FieldZoneAny = FieldZoneHanging | FieldZoneMiddle
+} FieldZone;
 
-#define COLOR_BLUE 0
-#define COLOR_RED 1
+typedef enum {
+	FieldColorUnknown = 0x0,
+	FieldColorRed = 0x1,
+	FieldColorBlue = 0x2,
+	FieldColorAny = FieldColorRed | FieldColorBlue
+} FieldColor;
 
-int fieldZone = -1;
-int fieldColor = -1;
-bool enabled = false;
+static bool doneSelection = false;
+static FieldZone selectedFieldZone = -1;
+static FieldColor selectedFieldColor = -1;
 
-bool doneSelection = false;
+struct AutonomousRoutine {
+	AutonomousRoutine *prev;
+	AutonomousRoutine *next;
+	int zone;
+	int color;
+	char *name;
+	int tag;
+} AutonomousRoutine;
+
+static AutonomousRoutine routines[20];
+static int slot = 0;
+
+static AutonomousRoutine *first = NULL;
+static AutonomousRoutine *selected = NULL;
+
+void AddAutonomousRoutine(FieldZone zone, FieldColor color, char *name, int tag) {
+	routines[slot].prev = NULL;
+	routines[slot].next = NULL;
+	routines[slot].zone = zone;
+	routines[slot].color = color;
+	routines[slot].name = name;
+	routines[slot].tag = tag;
+
+	if (first == NULL) {
+		first = &routines[slot];
+	} else {
+		AutonomousRoutine *prev = first;
+		while (prev->next)
+			prev = prev->next;
+		routines[slot].prev = prev;
+		prev->next = &routines[slot];
+	}
+
+	slot++;
+}
+
+TControllerButtons waitForButtons(TControllerButtons allowed) {
+	TControllerButtons previous = 0;
+	TControllerButtons selected = 0;
+	while (selected == 0) {
+		if ((allowed & kButtonLeft) != 0 && (previous & kButtonLeft) == kButtonLeft && (nLCDButtons & kButtonLeft) == 0) {
+			selected = kButtonLeft;
+		} else if ((allowed & kButtonCenter) != 0 && (previous & kButtonCenter) == kButtonCenter && (nLCDButtons & kButtonCenter) == 0) {
+			selected = kButtonCenter;
+		} else if ((allowed & kButtonRight) != 0 && (previous & kButtonRight) == kButtonRight && (nLCDButtons & kButtonRight) == 0) {
+			selected = kButtonRight;
+		}
+
+		previous = nLCDButtons;
+		wait1Msec(20);
+	}
+	return selected;
+}
 
 task selection() {
 	doneSelection = false;
@@ -16,65 +76,63 @@ task selection() {
 	displayLCDCenteredString(0, "Select Zone");
 	displayLCDString(1, 0, "Hanging");
 	displayLCDString(1, 10, "Middle");
-	int buttons = 0;
-	while (true) {
-		if ((buttons & 0x1) && !(nLCDButtons & 0x1)) {
-			fieldZone = ZONE_HANGING;
+	switch (waitForButtons(kButtonLeft | kButtonRight)) {
+		case kButtonLeft:
+			selectedFieldZone = FieldZoneHanging;
 			break;
-		}
-		if ((buttons & 0x4) && !(nLCDButtons & 0x4)) {
-			fieldZone = ZONE_MIDDLE;
+		case kButtonRight:
+			selectedFieldZone = FieldZoneMiddle;
 			break;
-		}
-
-		buttons = nLCDButtons;
-		wait1Msec(20);
 	}
-
 	clearLCDLine(0);
 	clearLCDLine(1);
 
 	displayLCDCenteredString(0, "Select Color");
-	displayLCDString(1, 0, "Blue");
-	displayLCDString(1, 13, "Red");
-	buttons = 0;
-	while (true) {
-		if ((buttons & 0x1) && !(nLCDButtons & 0x1)) {
-			fieldColor = COLOR_BLUE;
+	displayLCDString(1, 0, "Red");
+	displayLCDString(1, 12, "Blue");
+	switch (waitForButtons(kButtonLeft | kButtonRight)) {
+		case kButtonLeft:
+			selectedFieldColor = FieldColorRed;
 			break;
-		}
-		if ((buttons & 0x4) && !(nLCDButtons & 0x4)) {
-			fieldColor = COLOR_RED;
+		case kButtonRight:
+			selectedFieldColor = FieldColorBlue;
 			break;
-		}
-
-		buttons = nLCDButtons;
-		wait1Msec(20);
 	}
-
 	clearLCDLine(0);
 	clearLCDLine(1);
 
-	displayLCDCenteredString(0, "Enabled");
-	displayLCDString(1, 0, "Yes");
-	displayLCDString(1, 11, "No");
-	buttons = 0;
-	while (true) {
-		if ((buttons & 0x1) && !(nLCDButtons & 0x1)) {
-			enabled = true;
-			break;
+	AutonomousRoutine *routine = first;
+	while (routine) {
+		if ((routine->zone & selectedFieldZone) == 0 || (routine->color & selectedFieldColor) == 0) {
+			if (routine->prev)
+				routine->prev->next = routine->next;
+			if (routine->next)
+				routine->next->prev = routine->prev;
 		}
-		if ((buttons & 0x4) && !(nLCDButtons & 0x4)) {
-			enabled = false;
-			break;
-		}
-
-		buttons = nLCDButtons;
-		wait1Msec(20);
+		routine = routine->next;
 	}
 
-	clearLCDLine(0);
-	clearLCDLine(1);
+	displayLCDCenteredString(0, "Select Routine");
+	AutonomousRoutine *current = first;
+	while (selected == NULL) {
+		displayLCDCenteredString(1, current->name);
+		displayLCDString(1, 0, (current != NULL && current->prev != NULL) ? "<-" : "  ");
+		displayLCDString(1, 14, (current != NULL && current->next != NULL) ? "->" : "  ");
+		switch (waitForButtons(kButtonLeft | kButtonCenter | kButtonRight)) {
+			case kButtonLeft:
+				if (current != NULL && current->prev != NULL)
+					current = current->prev;
+				break;
+			case kButtonRight:
+				if (current != NULL && current->next != NULL)
+					current = current->next;
+				break;
+			case kButtonCenter:
+				if (current)
+					selected = current;
+				break;
+		}
+	}
 
 	doneSelection = true;
 }
@@ -92,4 +150,16 @@ void SelectAutonomousRoutine() {
 
 	StopTask(selection);
 	bLCDBacklight = false;
+}
+
+FieldZone SelectedFieldZone() {
+	return selectedFieldZone;
+}
+
+FieldColor SelectedFieldColor() {
+	return selectedFieldColor;
+}
+
+AutonomousRoutine * SelectedAutonomousRoutine() {
+	return selected;
 }
