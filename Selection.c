@@ -19,8 +19,8 @@ static FieldColor selectedFieldColor = -1;
 struct AutonomousRoutine {
 	AutonomousRoutine *prev;
 	AutonomousRoutine *next;
-	int zone;
-	int color;
+	FieldZone zone;
+	FieldColor color;
 	char *name;
 	int tag;
 } AutonomousRoutine;
@@ -141,14 +141,14 @@ void SelectAutonomousRoutine() {
 	if (!bIfiRobotDisabled) return;
 
 	bLCDBacklight = true;
-	StartTask(selection);
+	startTask(selection);
 
 	while (!doneSelection) {
 		if (!bIfiRobotDisabled) doneSelection = true;
 		wait1Msec(25);
 	}
 
-	StopTask(selection);
+	stopTask(selection);
 	bLCDBacklight = false;
 }
 

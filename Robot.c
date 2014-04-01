@@ -17,6 +17,10 @@ void drive(int left, int right) {
 	motor[RDDrive] = right;
 }
 
+void driveAdjusted(int left, int right) {
+	drive(left, right);
+}
+
 void intake(int power) {
 	motor[LIntake] = power;
 	motor[RIntake] = power;
@@ -57,7 +61,7 @@ void driveTicks(int power, int ticks) {
 	nMotorEncoder[LDDrive] = 0;
 	nMotorEncoder[RDDrive] = 0;
 	while (abs(nMotorEncoder[LDDrive]) < ticks || abs(nMotorEncoder[RDDrive]) < ticks) {
-		drive(abs(nMotorEncoder[LDDrive]) < ticks ? power : 0, abs(nMotorEncoder[RDDrive]) < ticks ? power : 0);
+		driveAdjusted(abs(nMotorEncoder[LDDrive]) < ticks ? power : 0, abs(nMotorEncoder[RDDrive]) < ticks ? power : 0);
 	}
 	drive(0, 0);
 }
@@ -68,13 +72,13 @@ void turnTicks(bool right, int power, int ticks) {
 	int leftScale = right ? 1 : -1;
 	int rightScale = right ? -1 : 1;
 	while (abs(nMotorEncoder[LDDrive]) < ticks || abs(nMotorEncoder[RDDrive]) < ticks) {
-		drive(abs(nMotorEncoder[LDDrive]) < ticks ? leftScale * power : 0, abs(nMotorEncoder[RDDrive]) < ticks ? rightScale * power : 0);
+		driveAdjusted(abs(nMotorEncoder[LDDrive]) < ticks ? leftScale * power : 0, abs(nMotorEncoder[RDDrive]) < ticks ? rightScale * power : 0);
 	}
 	drive(0, 0);
 }
 
 int liftTarget(int target) {
-	ClearTimer(T4);
+	clearTimer(T4);
 	int maxTime = 2000;
 	int difference = target - SensorValue[liftHeight];
 	if (difference > 0) {

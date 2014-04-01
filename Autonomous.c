@@ -1,21 +1,23 @@
-static int globalPower;
-static int globalTicks;
-static bool globalDone;
+TSemaphore drivingSemaphore;
+static int drivingPower;
+static int drivingTicks;
+
 task drivingTask() {
-	globalDone = false;
-	driveTicks(globalPower, globalTicks);
-	globalDone = true;
+	semaphoreLock(drivingSemaphore);
+	driveTicks(drivingPower, drivingTicks);
+	semaphoreUnlock(drivingSemaphore);
 }
 
 void driveTicksAsync(int power, int ticks) {
-	globalPower = power;
-	globalTicks = ticks;
-	StartTask(drivingTask);
+	semaphoreInitialize(drivingSemaphore);
+	drivingPower = power;
+	drivingTicks = ticks;
+	startTask(drivingTask);
 }
 
 void waitForDrive() {
-	while (!globalDone)
-		wait1Msec(1);
+	semaphoreLock(drivingSemaphore);
+	semaphoreUnlock(drivingSemaphore);
 }
 
 void programmingSkills() {
@@ -48,20 +50,23 @@ void programmingSkills() {
 }
 
 void middleZoneAutonCap() {
-	driveTicks(127, 1300);
+	driveTicks(127, 1250);
 	wait1Msec(500);
 	turnTicks((SelectedFieldColor() == FieldColorRed), 96, 100);
 	if (liftTarget(LIFT_UPPER_LIMIT) != 0) return;
 	lift(30);
+	wait1Msec(500);
 	driveTicks(64, 600);
 	drive((SelectedFieldColor() == FieldColorRed) ? 0 : 127, (SelectedFieldColor() == FieldColorRed) ? 127 : 0);
 	wait1Msec(500);
 	drive(0, 0);
-	wait1Msec(500);
+	wait1Msec(750);
 	intake(127);
 	wait1Msec(300);
 	intake(0);
-	driveTicks(-60, 125);
+	if (liftTarget(LIFT_UPPER_LIMIT) != 0) return;
+	lift(30);
+	driveTicks(-60, 175);
 	lift(0);
 	wait1Msec(500);
 	intake(54);
@@ -92,9 +97,7 @@ void middleZoneAutonPartner() {
 	driveTicks(-72, 200);
 	if (liftTarget(LIFT_LOWER_LIMIT) != 0) return;
 	driveTicks(-127, 1200);
-
-	wait1Msec(2500);
-
+	waitForButtons(kButtonLeft | kButtonCenter | kButtonRight);
 	driveTicks(127, 1100);
 	driveTicksAsync(72, 450);
 	if (liftTarget(LIFT_UPPER_LIMIT) != 0) return;
@@ -133,11 +136,12 @@ void hangingZoneAutonClear() {
 	wait1Msec(1000);
 	turnTicks((SelectedFieldColor() == FieldColorBlue), 60, 200);
 	if (liftTarget(LIFT_LOWER_LIMIT + 200) != 0) return;
+	lift(30);
 	intake(0);
-	driveTicks(127, 1500);
-	if (liftTarget(LIFT_UPPER_LIMIT - 300) != 0) return;
-	launcher(true);
-	wait1Msec(1000);
-	launcher(false);
+	wait1Msec(500);
+	intake(127);
+	wait1Msec(750);
+	driveTicks(-127, 200);
+	intake(0);
 	if (liftTarget(LIFT_LOWER_LIMIT) != 0) return;
 }
