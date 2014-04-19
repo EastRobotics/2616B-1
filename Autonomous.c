@@ -1,3 +1,13 @@
+/*
+ * Asynchronous autonomous functions
+ *
+ * driveTicksAsync - Starts driving for a number of ticks and immediately returns
+ * waitForDrive - Waits for the driving task to complete
+ *
+ * These functions allow for normally blocking tasks to execute simultaneously
+ * (e.g. driving and lifting to specific targets)
+ */
+
 TSemaphore drivingSemaphore;
 static int drivingPower;
 static int drivingTicks;
@@ -20,6 +30,11 @@ void waitForDrive() {
 	semaphoreUnlock(drivingSemaphore);
 }
 
+/*
+ * Autonomous routines
+ *
+ * These are the actual routines executed in autonomous mode
+ */
 void programmingSkills() {
 	intake(-127);
 	driveTicks(60, 250);

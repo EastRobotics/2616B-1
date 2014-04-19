@@ -3,6 +3,11 @@
 #define LIFT_LOWER_LIMIT 840
 #define LIFT_UPPER_LIMIT 2270
 
+/*
+ * Basic robot control functions
+ *
+ * These are the only functions that touch the motors
+ */
 void lift(int power) {
 	motor[LLift] = power;
 	motor[RLift] = power;
@@ -34,6 +39,11 @@ bool launched() {
 	return (SensorValue[solenoid] != 0);
 }
 
+/*
+ * Display utilities
+ *
+ * These functions handle displaying battery voltage
+ */
 void displayVoltage(int line, int position, int millivolts, bool leftAligned) {
 	displayLCDPos(line, position);
 
@@ -57,6 +67,13 @@ void displayLCDVoltageString(int line) {
 	displayVoltage(1, 11, expanderBatteryLevel, false);
 }
 
+/*
+ * Sensor based autonomous functions
+ *
+ * driveTicks - Drives the robot straight for a number of ticks
+ * turnTicks - Turns the robot for a number of ticks
+ * liftTaregt - Moves the lift to a target potentiometer value
+ */
 void driveTicks(int power, int ticks) {
 	nMotorEncoder[LDDrive] = 0;
 	nMotorEncoder[RDDrive] = 0;

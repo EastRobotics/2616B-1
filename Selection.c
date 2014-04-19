@@ -1,3 +1,8 @@
+/*
+ * These enums represent the field color and zone of a routine
+ *
+ * They are bitmasks so that they can represent both at once
+ */
 typedef enum {
 	FieldZoneUnknown = 0x0,
 	FieldZoneHanging = 0x1,
@@ -16,6 +21,12 @@ static bool doneSelection = false;
 static FieldZone selectedFieldZone = -1;
 static FieldColor selectedFieldColor = -1;
 
+/*
+ * This structure defines an autonomous routine
+ *
+ * It includes pointers to be part of a doubly linked list
+ */
+
 struct AutonomousRoutine {
 	AutonomousRoutine *prev;
 	AutonomousRoutine *next;
@@ -31,6 +42,9 @@ static int slot = 0;
 static AutonomousRoutine *first = NULL;
 static AutonomousRoutine *selected = NULL;
 
+/*
+ * Creates a new autonomous routine and adds it to the linked list
+ */
 void AddAutonomousRoutine(FieldZone zone, FieldColor color, char *name, int tag) {
 	routines[slot].prev = NULL;
 	routines[slot].next = NULL;
@@ -52,6 +66,12 @@ void AddAutonomousRoutine(FieldZone zone, FieldColor color, char *name, int tag)
 	slot++;
 }
 
+/*
+ * Wait for screen buttons to be pressed
+ *
+ * Takes a bitmask of which buttons are being waited for
+ * and returns which button was pressed
+ */
 TControllerButtons waitForButtons(TControllerButtons allowed) {
 	TControllerButtons previous = 0;
 	TControllerButtons selected = 0;
@@ -73,6 +93,7 @@ TControllerButtons waitForButtons(TControllerButtons allowed) {
 task selection() {
 	doneSelection = false;
 
+	// Select the starting tile zone
 	displayLCDCenteredString(0, "Select Zone");
 	displayLCDString(1, 0, "Hanging");
 	displayLCDString(1, 10, "Middle");
@@ -87,6 +108,7 @@ task selection() {
 	clearLCDLine(0);
 	clearLCDLine(1);
 
+	// Select the starting tile color
 	displayLCDCenteredString(0, "Select Color");
 	displayLCDString(1, 0, "Red");
 	displayLCDString(1, 12, "Blue");
@@ -101,6 +123,7 @@ task selection() {
 	clearLCDLine(0);
 	clearLCDLine(1);
 
+	// Filter the linked list based on the selected zone and color
 	AutonomousRoutine *routine = first;
 	while (routine) {
 		if ((routine->zone & selectedFieldZone) == 0 || (routine->color & selectedFieldColor) == 0) {
@@ -112,6 +135,7 @@ task selection() {
 		routine = routine->next;
 	}
 
+	// Select from the routines remaining in the linked list
 	displayLCDCenteredString(0, "Select Routine");
 	AutonomousRoutine *current = first;
 	while (selected == NULL) {
@@ -137,6 +161,12 @@ task selection() {
 	doneSelection = true;
 }
 
+/*
+ * Select the autonomous routine
+ *
+ * This is a blocking function that selects the autonomous routine
+ * while the robot is disabled
+ */
 void SelectAutonomousRoutine() {
 	if (!bIfiRobotDisabled) return;
 
@@ -152,6 +182,9 @@ void SelectAutonomousRoutine() {
 	bLCDBacklight = false;
 }
 
+/*
+ * Return the selected zone, color, and routine
+ */
 FieldZone SelectedFieldZone() {
 	return selectedFieldZone;
 }

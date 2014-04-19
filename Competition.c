@@ -28,11 +28,15 @@
 
 void pre_auton() {
 	bStopTasksBetweenModes = true;
+
+	// Add the autonomous routines
 	AddAutonomousRoutine(FieldZoneAny, FieldColorAny, "None", -1);
 	AddAutonomousRoutine(FieldZoneMiddle, FieldColorAny, "Cap", 0);
 	AddAutonomousRoutine(FieldZoneMiddle, FieldColorAny, "Partner", 1);
 	AddAutonomousRoutine(FieldZoneHanging, FieldColorAny, "Clear", 2);
 	AddAutonomousRoutine(FieldZoneMiddle, FieldColorRed, "Skills", 3);
+
+	// Select the autonomous routines
 	SelectAutonomousRoutine();
 }
 
@@ -40,13 +44,19 @@ task autonomous() {
 	clearLCDLine(0);
 	clearLCDLine(1);
 	bLCDBacklight = false;
+
+	// Display the selected autonomous routine
 	AutonomousRoutine *routine = SelectedAutonomousRoutine();
 	displayLCDCenteredString(0, routine ? routine->name : "");
 
+	// Flip down the rollers
 	intake(127);
 	wait1Msec(500);
 	intake(0);
 
+	// Run the autonomous routine
+	// Unfortunately, this can't be dynamic. RobotC does not support
+	// function pointers
 	switch (routine ? routine->tag : -1) {
 		case 0:
 			middleZoneAutonCap();
@@ -71,17 +81,23 @@ task usercontrol() {
 	bool pressed = false;
 	while (true) {
 		if (vexRT[Btn8U] || vexRT[Btn8R]) {
+			// Test the adjusted drive function
 			int power = vexRT[Btn8U] ? 127 : -127;
 			driveAdjusted(power, power);
 			lift(0);
 			intake(0);
 		} else {
+			// Drive the robot with the vertical joystick axes
 			drive(NORM(vexRT[Ch3]), NORM(vexRT[Ch2]));
+			// Lift based on button 6
 			lift((nVexRCReceiveState & vrXmit2) ? NORM(vexRT[Ch3Xmtr2]) : (vexRT[Btn6U] ? 127 : vexRT[Btn6D] ? -127 : 0));
+			// Intake based on button 5
 			intake((nVexRCReceiveState & vrXmit2) ? NORM(vexRT[Ch2Xmtr2]) : (vexRT[Btn5U] ? 127 : vexRT[Btn5D] ? -127 : 0));
+			// Toggle the launcher based on button 8D
 			if (!pressed && vexRT[Btn8D]) launcher(!launched());
 			pressed = (vexRT[Btn8D] != 0);
 		}
+		// Display battery voltage on line 1
 		displayLCDVoltageString(1);
 		wait1Msec(20);
 	}
